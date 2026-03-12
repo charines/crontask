@@ -1,6 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Play, Plus, X, Trash2, ArrowLeft, RotateCcw, SkipBack, SkipForward, Pause, Timer } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ArrowLeft, 
+  Timer, 
+  Plus, 
+  Trash2, 
+  Play, 
+  X, 
+  ChevronRight, 
+  Pause, 
+  SkipBack, 
+  SkipForward 
+} from 'lucide-react';
 
 const STORAGE_KEY = 'crontask_activities';
 
@@ -10,21 +21,16 @@ export default function App() {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : [];
   });
-  const [currentActivityIndex, setCurrentActivityIndex] = useState(-1); // -1 means initial countdown
-  const [timeLeft, setTimeLeft] = useState(5); // Initial countdown of 5 seconds
+  const [currentActivityIndex, setCurrentActivityIndex] = useState(-1);
+  const [timeLeft, setTimeLeft] = useState(5);
   const [isActive, setIsActive] = useState(false);
   const [isPreStart, setIsPreStart] = useState(true);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
   }, [activities]);
 
   const addActivity = (name, durationMinutes) => {
-    if (name === 'CLEAR_ALL') {
-      setActivities([]);
-      return;
-    }
     const newActivity = {
       id: Date.now(),
       name,
@@ -35,6 +41,12 @@ export default function App() {
 
   const deleteActivity = (id) => {
     setActivities(activities.filter(a => a.id !== id));
+  };
+
+  const clearAll = () => {
+    if (window.confirm('Limpar todas as tarefas?')) {
+      setActivities([]);
+    }
   };
 
   const startSequence = () => {
@@ -58,12 +70,12 @@ export default function App() {
       setTimeLeft(activities[nextIdx].durationMinutes * 60);
       setIsPreStart(false);
     } else {
-      // Completed! TimerView handles completion state
       setIsActive(false);
+      alert("Sequência concluída!");
+      setView('config');
     }
   }, [currentActivityIndex, activities]);
 
-  // Timer logic
   useEffect(() => {
     let interval = null;
     if (isActive && timeLeft > 0) {
@@ -77,33 +89,38 @@ export default function App() {
   }, [isActive, timeLeft, nextActivity]);
 
   return (
-    <div className="app-container">
-      <AnimatePresence mode="wait">
-        {view === 'config' ? (
-          <ConfigView 
-            activities={activities} 
-            onAdd={addActivity} 
-            onDelete={deleteActivity} 
-            onStart={startSequence} 
-          />
-        ) : (
-          <TimerView 
-            activities={activities}
-            currentIndex={currentActivityIndex}
-            timeLeft={timeLeft}
-            isActive={isActive}
-            setIsActive={setIsActive}
-            isPreStart={isPreStart}
-            onClose={quitTimer}
-            onSkip={() => nextActivity()}
-          />
-        )}
-      </AnimatePresence>
+    <div className="bg-[#0a0f0d] min-h-screen text-white font-display flex flex-col items-center selection:bg-primary selection:text-background-dark">
+      <div className="w-full max-w-md bg-background-dark shadow-2xl relative min-h-screen flex flex-col border-x border-white/5 mx-auto">
+        <AnimatePresence mode="wait">
+          {view === 'config' ? (
+            <ConfigView 
+              key="config"
+              activities={activities} 
+              onAdd={addActivity} 
+              onDelete={deleteActivity} 
+              onClear={clearAll}
+              onStart={startSequence} 
+            />
+          ) : (
+            <TimerView 
+              key="timer"
+              activities={activities}
+              currentIndex={currentActivityIndex}
+              timeLeft={timeLeft}
+              isActive={isActive}
+              setIsActive={setIsActive}
+              isPreStart={isPreStart}
+              onClose={quitTimer}
+              onSkip={() => nextActivity()}
+            />
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
 
-function ConfigView({ activities, onAdd, onDelete, onStart }) {
+function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
 
@@ -115,310 +132,288 @@ function ConfigView({ activities, onAdd, onDelete, onStart }) {
     setDuration('');
   };
 
-  const totalTime = activities.reduce((acc, curr) => acc + curr.durationMinutes, 0);
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="view pb-32"
-    >
-      <header className="p-6 border-b border-white/5 flex items-center justify-between">
-        <h1 className="text-xl font-bold">Configurar Sequência</h1>
-        {activities.length > 0 && (
-          <button 
-            onClick={() => { if(confirm('Limpar todas as tarefas?')) onAdd('CLEAR_ALL'); }} 
-            className="text-xs text-danger font-bold flex items-center gap-1 opacity-60 hover:opacity-100"
-          >
-            <Trash2 size={14} />
-            Limpar
-          </button>
-        )}
-      </header>
-
-      <div className="p-6 space-y-8">
-        <section>
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold">Nova Atividade</h2>
-            <p className="text-dim text-sm">Crie seu fluxo personalizado</p>
-          </div>
-          
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-dim">O que fazer (máx 180 car.)</label>
-              <input 
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Ex: Alongamento Matinal" 
-                maxLength={180}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-dim">Duração (minutos)</label>
-              <div className="relative">
-                <input 
-                  type="number"
-                  step="0.1"
-                  value={duration}
-                  onChange={e => setDuration(e.target.value)}
-                  placeholder="5" 
-                />
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-primary">
-                  <Timer size={20} />
-                </div>
-              </div>
-            </div>
-
-            <button type="submit" className="secondary-btn w-full">
-              <Plus size={20} />
-              Adicionar Etapa
-            </button>
-          </form>
-        </section>
-
-        <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg">Sequência Atual</h3>
-            <span className="bg-primary/20 text-primary text-xs font-bold px-3 py-1 rounded-full">
-              {activities.length} Etapas
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {activities.map((activity, index) => (
-              <motion.div 
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                key={activity.id} 
-                className="flex items-center gap-4 p-4 rounded-2xl glass border-primary/10"
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                  {index + 1}
-                </div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-sm">{activity.name}</h4>
-                  <p className="text-xs text-dim">{activity.durationMinutes} minutos</p>
-                </div>
-                <button onClick={() => onDelete(activity.id)} className="text-dim hover:text-danger">
-                  <Trash2 size={18} />
-                </button>
-              </motion.div>
-            ))}
-            {activities.length === 0 && (
-              <div className="text-center py-10 text-dim italic text-sm">
-                Nenhuma atividade adicionada ainda.
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-
-      <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[450px] p-6 glass border-t border-white/5 pb-10">
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-dim">Duração Total:</span>
-          <span className="font-bold text-primary">{totalTime} minutos</span>
-        </div>
-        <button 
-          onClick={onStart}
-          disabled={activities.length === 0}
-          className="primary-btn w-full disabled:opacity-50 disabled:grayscale"
-        >
-          <Play fill="currentColor" size={20} />
-          Iniciar Sequência
-        </button>
-      </footer>
-    </motion.div>
-  );
-}
-
-function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, isPreStart, onClose, onSkip }) {
-  const [isFinished, setIsFinished] = useState(false);
-
-  // Handle completion locally to show a nice screen
-  useEffect(() => {
-    if (currentIndex === activities.length - 1 && timeLeft === 0 && isActive) {
-      setIsFinished(true);
-      setIsActive(false);
-    }
-  }, [timeLeft, currentIndex, activities.length, isActive, setIsActive]);
-
-  if (isFinished) {
-    return (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="view min-h-screen flex flex-col items-center justify-center p-6 text-center"
-      >
-        <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary mb-6 float">
-          <Play fill="currentColor" size={48} />
-        </div>
-        <h1 className="text-4xl font-black mb-2 uppercase tracking-tighter">Pronto!</h1>
-        <p className="text-dim mb-12">Você completou toda a sequência.</p>
-        <button onClick={onClose} className="primary-btn w-full max-w-xs">
-          Voltar ao Início
-        </button>
-      </motion.div>
-    );
-  }
-
-  const currentActivity = currentIndex === -1 ? { name: "Ready?", durationMinutes: 0.1 } : activities[currentIndex];
-  const nextActivity = currentIndex < activities.length - 1 ? activities[currentIndex + 1] : null;
-
-  const totalSeconds = isPreStart ? 5 : currentActivity.durationMinutes * 60;
-  const progress = (timeLeft / totalSeconds) * 100;
-  const isLastSeconds = timeLeft <= 5 && timeLeft > 0;
-
-  const formatTime = (seconds) => {
-    if (isPreStart) return seconds;
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+  const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationMinutes, 0) * 100) / 100;
 
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className={`view min-h-screen flex flex-col transition-colors duration-300 ${isLastSeconds ? 'alert-flash' : ''}`}
+      className="flex-1 flex flex-col h-full bg-background-dark"
     >
-      <header className="p-6 flex items-center justify-between z-20">
-        <button onClick={onClose} className="icon-btn">
+      {/* Top Navigation */}
+      <div className="flex items-center p-4 border-b border-white/10 shrink-0">
+        <button className="p-2 -ml-2 rounded-full hover:bg-primary/10 transition-colors">
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-lg font-bold ml-2">Configurar Sequência</h1>
+        {activities.length > 0 && (
+          <button 
+            onClick={onClear}
+            className="ml-auto p-2 text-danger opacity-60 hover:opacity-100 hover:bg-danger/10 rounded-full transition-all"
+          >
+            <Trash2 size={20} />
+          </button>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-40">
+        {/* Header Section */}
+        <div className="pt-6 pb-2">
+          <h2 className="text-2xl font-bold tracking-tight">Nova Atividade</h2>
+          <p className="text-sm text-primary/60 mt-1">Crie seu fluxo personalizado</p>
+        </div>
+
+        {/* Input Form */}
+        <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-300">O que fazer (máx 180 car.)</label>
+            <input 
+              className="w-full rounded-lg border border-primary/20 bg-primary/5 text-white focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 transition-all outline-none"
+              maxLength={180}
+              placeholder="Ex: Alongamento Matinal"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-slate-300">Duração (minutos)</label>
+            <div className="flex">
+              <input 
+                className="flex-1 rounded-l-lg border border-primary/20 bg-primary/5 text-white focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 border-r-0 outline-none"
+                placeholder="5"
+                type="number"
+                step="0.1"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+              />
+              <div className="flex items-center px-4 bg-primary/10 border border-l-0 border-primary/20 rounded-r-lg text-primary">
+                <Timer size={20} />
+              </div>
+            </div>
+          </div>
+          <button 
+            onClick={handleSubmit}
+            className="w-full bg-primary/20 hover:bg-primary/30 text-primary font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all mt-2"
+          >
+            <Plus size={20} />
+            <span>Adicionar Etapa</span>
+          </button>
+        </div>
+
+        {/* Task List Section */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-bold text-lg">Sequência Atual</h3>
+            <span className="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full font-bold">
+              {activities.length} {activities.length === 1 ? 'Etapa' : 'Etapas'}
+            </span>
+          </div>
+          <div className="space-y-3">
+            {activities.map((activity, index) => (
+              <motion.div 
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={activity.id}
+                className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20 group"
+              >
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">{index + 1}</div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-sm">{activity.name}</h4>
+                  <p className="text-xs text-slate-400">{activity.durationMinutes} minutos</p>
+                </div>
+                <button 
+                  onClick={() => onDelete(activity.id)}
+                  className="text-slate-400 hover:text-danger transition-colors p-2"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </motion.div>
+            ))}
+            {activities.length === 0 && (
+              <div className="text-center py-12 text-slate-500 italic text-sm border border-dashed border-white/10 rounded-2xl">
+                Nenhuma atividade adicionada ainda.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Sticky Footer */}
+      <div className="absolute bottom-0 left-0 w-full p-6 bg-background-dark/95 border-t border-white/10 pb-10 backdrop-blur-md">
+        <div className="flex items-center justify-between mb-4 px-1">
+          <span className="text-sm font-medium text-slate-500">Duração Total:</span>
+          <span className="text-base font-bold text-primary">{totalTime} minutos</span>
+        </div>
+        <button 
+          onClick={onStart}
+          disabled={activities.length === 0}
+          className="w-full bg-primary hover:bg-primary/90 text-background-dark font-black py-4 rounded-xl shadow-[0_8px_30px_rgb(17,212,115,0.3)] flex items-center justify-center gap-2 transform active:scale-95 transition-all text-lg uppercase tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Play size={24} fill="currentColor" />
+          <span>Iniciar Sequência</span>
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
+function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, isPreStart, onClose, onSkip }) {
+  const currentActivity = currentIndex === -1 ? { name: "Prepare-se!", durationMinutes: 5/60 } : activities[currentIndex];
+  const nextActivity = currentIndex < activities.length - 1 ? activities[currentIndex + 1] : null;
+
+  const totalSecondsForCircle = isPreStart ? 5 : currentActivity.durationMinutes * 60;
+  const progress = (timeLeft / totalSecondsForCircle) * 100;
+  const isLastSeconds = timeLeft <= 5 && timeLeft > 0;
+
+  const formatTime = (seconds) => {
+    if (isPreStart) return seconds;
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.round(seconds % 60);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const getStrokeDashOffset = () => {
+    const radius = 120;
+    const circumference = 2 * Math.PI * radius;
+    return circumference - (progress / 100) * circumference;
+  };
+
+  const totalTimeLeft = activities.slice(Math.max(0, currentIndex)).reduce((acc, c) => acc + c.durationMinutes * 60, 0) - (currentIndex === -1 ? 0 : (totalSecondsForCircle - timeLeft));
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className={`flex-1 flex flex-col relative overflow-hidden bg-background-dark ${isLastSeconds ? 'alert-flash' : ''}`}
+    >
+      {/* Top App Bar */}
+      <div className="flex items-center p-4 justify-between z-20">
+        <button 
+          onClick={onClose}
+          className="text-white flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+        >
           <X size={24} />
         </button>
-        <h2 className="text-lg font-bold truncate px-4">Sessão Ativa</h2>
-        <div className="w-11" />
-      </header>
+        <h2 className="text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">
+          {currentIndex === -1 ? 'Sessão Iniciando' : `${currentIndex + 1} de ${activities.length}`}
+        </h2>
+      </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6 relative">
-        <div className="relative w-80 h-80 flex items-center justify-center mb-12 animate-scale">
-          {/* Progress ring with glow */}
-          <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <defs>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="4" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-            </defs>
-            <circle
-              cx="160"
-              cy="160"
-              r="140"
-              stroke="rgba(var(--primary-rgb), 0.05)"
-              strokeWidth="12"
-              fill="none"
+      {/* Timer Area */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 z-10 w-full">
+        <div className="relative inline-flex items-center justify-center mb-6">
+          {/* Progress Circle */}
+          <svg className="w-72 h-72 transform -rotate-90">
+            <circle 
+              className="text-white/5" 
+              cx="144" cy="144" r="120" 
+              fill="transparent" 
+              stroke="currentColor" 
+              strokeWidth="6"
             />
-            <motion.circle
-              cx="160"
-              cy="160"
-              r="140"
-              stroke="var(--primary)"
-              strokeWidth="12"
-              fill="none"
-              strokeDasharray="880"
-              animate={{ strokeDashoffset: 880 - (880 * progress) / 100 }}
+            <motion.circle 
+              className="text-primary" 
+              cx="144" cy="144" r="120" 
+              fill="transparent" 
+              stroke="currentColor" 
+              strokeWidth="6"
+              strokeDasharray={2 * Math.PI * 120}
+              animate={{ strokeDashoffset: getStrokeDashOffset() }}
               transition={{ ease: "linear", duration: 1 }}
               strokeLinecap="round"
-              filter={isLastSeconds ? "url(#glow)" : ""}
             />
           </svg>
-
-          <div className="text-center z-10">
-            <AnimatePresence mode="wait">
-              <motion.h1 
-                key={timeLeft}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className={`text-[100px] font-black tabular-nums leading-none tracking-tighter ${isLastSeconds ? 'text-danger' : ''}`}
-              >
-                {isPreStart ? timeLeft : (formatTime(timeLeft).split(':')[1] || timeLeft)}
-              </motion.h1>
-            </AnimatePresence>
-            {!isPreStart && (
-               <p className="text-5xl font-bold text-dim/30 tabular-nums -mt-4">
-                 {formatTime(timeLeft).split(':')[0]}:
-               </p>
-            )}
-            <p className="text-primary font-black tracking-[0.3em] text-[10px] uppercase mt-4">
-              {isPreStart ? "Iniciando em" : "Segundos Restantes"}
-            </p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <motion.h1 
+              key={timeLeft}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="text-white text-[90px] font-black leading-none tabular-nums"
+            >
+              {timeLeft < 60 ? timeLeft : formatTime(timeLeft)}
+            </motion.h1>
+            <span className="text-primary font-bold tracking-[0.2em] text-[10px] uppercase mt-2 opacity-80">
+              {isPreStart ? 'Segundos para começar' : 'Tempo Restante'}
+            </span>
           </div>
         </div>
 
-        <div className="text-center px-4 w-full">
-          <motion.div
-            key={currentActivity.id}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-          >
-            <h4 className="text-primary text-[10px] font-black tracking-[0.4em] uppercase mb-2 opacity-60">Atividade Atual</h4>
-            <h2 className="text-4xl font-extrabold leading-tight tracking-tight">{currentActivity.name}</h2>
-          </motion.div>
-          
-          <div className="mt-10 flex gap-4 w-full justify-center">
-             <div className="flex-1 max-w-[140px] glass p-4 rounded-3xl border-white/5">
-                <p className="text-[10px] uppercase font-black text-dim tracking-wider mb-1">Etapa</p>
-                <p className="text-xl font-bold">{currentIndex === -1 ? 0 : currentIndex + 1} / {activities.length}</p>
-             </div>
-             <div className="flex-1 max-w-[140px] glass p-4 rounded-3xl border-white/5">
-                <p className="text-[10px] uppercase font-black text-dim tracking-wider mb-1">Total</p>
-                <p className="text-xl font-bold">{Math.round(((currentIndex + 1) / activities.length) * 100)}%</p>
-             </div>
+        {/* Activity Details */}
+        <div className="mt-4 text-center w-full px-6">
+          <h4 className="text-primary/60 text-[10px] font-black leading-normal tracking-[0.3em] uppercase mb-1">PROCESSO ATUAL</h4>
+          <h1 className="text-white text-3xl font-extrabold leading-tight tracking-tight break-words">{currentActivity.name}</h1>
+        </div>
+
+        {/* Stats */}
+        <div className="flex gap-4 mt-8 w-full px-4">
+          <div className="flex flex-1 flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/10">
+            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Etapa</span>
+            <p className="text-white text-xl font-bold">{currentIndex === -1 ? 0 : currentIndex + 1} / {activities.length}</p>
+          </div>
+          <div className="flex flex-1 flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/10">
+            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Minutos Restantes</span>
+            <p className="text-white text-xl font-bold">
+              {Math.max(0, Math.ceil(totalTimeLeft / 60))}
+            </p>
           </div>
         </div>
       </main>
 
-      <footer className="p-6 pb-12 z-20">
-        <AnimatePresence>
-          {nextActivity && (
-            <motion.div 
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              className="glass p-6 rounded-[32px] border-white/5 flex items-center justify-between mb-8 overflow-hidden relative"
-            >
-              <div className="absolute right-0 top-0 w-24 h-full bg-gradient-to-l from-primary/10 to-transparent pointer-events-none" />
-              <div className="flex items-center gap-5">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <SkipForward size={28} />
-                </div>
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-dim mb-1">Próxima Etapa</p>
-                  <h3 className="font-bold text-lg">{nextActivity.name}</h3>
-                  <p className="text-xs text-dim italic opacity-60">{nextActivity.durationMinutes} minutos</p>
-                </div>
-              </div>
-              <button 
-                onClick={onSkip} 
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-dim hover:text-white"
+      {/* Footer / Next Activity */}
+      <footer className="p-6 pb-12 z-10 w-full mt-auto">
+        <div className="max-w-xs mx-auto mb-8">
+          <AnimatePresence mode="wait">
+            {nextActivity ? (
+              <motion.div 
+                key={nextActivity.id}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10"
               >
-                <SkipForward size={20} />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">Próxima Etapa</span>
+                  <div className="size-2 rounded-full bg-primary animate-pulse" />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                    <SkipForward size={20} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-white font-bold text-sm truncate">{nextActivity.name}</h3>
+                    <p className="text-slate-500 text-[10px]">{nextActivity.durationMinutes} minutos</p>
+                  </div>
+                  <button onClick={onSkip} className="text-slate-400 hover:text-white transition-colors">
+                    <ChevronRight size={20} />
+                  </button>
+                </div>
+              </motion.div>
+            ) : (
+                <div className="h-20" /> /* Spacer if no next activity */
+            )}
+          </AnimatePresence>
+        </div>
 
-        <div className="flex items-center justify-center gap-10">
-          <button className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-dim hover:text-white" onClick={() => {
-            if(currentIndex > 0) {
-              // Backward logic can be added here if needed
-            }
-          }}>
-            <SkipBack size={28} />
+        {/* Controls */}
+        <div className="flex items-center justify-center gap-8">
+          <button className="size-14 rounded-full border border-white/10 flex items-center justify-center text-slate-500 hover:bg-white/5 hover:text-white transition-all">
+            <SkipBack size={24} />
           </button>
-          
           <button 
-            className="w-24 h-24 rounded-full bg-primary flex items-center justify-center text-bg-dark shadow-[0_15px_45px_0_rgba(var(--primary-rgb),0.3)] hover:scale-105 active:scale-95 transition-all" 
             onClick={() => setIsActive(!isActive)}
+            className="size-20 rounded-full bg-primary flex items-center justify-center text-[#102219] shadow-[0_0_30px_rgba(17,212,115,0.3)] hover:scale-105 active:scale-95 transition-all"
           >
-            {isActive ? <Pause size={40} fill="currentColor" /> : <Play fill="currentColor" size={40} />}
+            {isActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
           </button>
-
-          <button className="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center text-dim hover:text-white" onClick={onSkip}>
-            <SkipForward size={28} />
+          <button 
+            onClick={onSkip}
+            className="size-14 rounded-full border border-white/10 flex items-center justify-center text-slate-500 hover:bg-white/5 hover:text-white transition-all"
+          >
+            <SkipForward size={24} />
           </button>
         </div>
       </footer>
