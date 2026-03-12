@@ -10,7 +10,9 @@ import {
   ChevronRight, 
   Pause, 
   SkipBack, 
-  SkipForward 
+  SkipForward,
+  ArrowUp,
+  ArrowDown
 } from 'lucide-react';
 
 const STORAGE_KEY = 'crontask_activities';
@@ -41,6 +43,18 @@ export default function App() {
 
   const deleteActivity = (id) => {
     setActivities(activities.filter(a => a.id !== id));
+  };
+
+  const moveActivity = (id, direction) => {
+    const index = activities.findIndex(a => a.id === id);
+    if (index === -1) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === activities.length - 1) return;
+
+    const newActivities = [...activities];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    [newActivities[index], newActivities[targetIndex]] = [newActivities[targetIndex], newActivities[index]];
+    setActivities(newActivities);
   };
 
   const clearAll = () => {
@@ -98,6 +112,7 @@ export default function App() {
               activities={activities} 
               onAdd={addActivity} 
               onDelete={deleteActivity} 
+              onMove={moveActivity}
               onClear={clearAll}
               onStart={startSequence} 
             />
@@ -120,7 +135,7 @@ export default function App() {
   );
 }
 
-function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
+function ConfigView({ activities, onAdd, onDelete, onMove, onClear, onStart }) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
 
@@ -217,19 +232,35 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={activity.id}
-                className="flex items-center gap-4 p-4 rounded-xl bg-primary/10 border border-primary/20 group"
+                className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20 group"
               >
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">{index + 1}</div>
-                <div className="flex-1">
-                  <h4 className="font-semibold text-sm">{activity.name}</h4>
-                  <p className="text-xs text-slate-400">{activity.durationSeconds} segundos</p>
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">{index + 1}</div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-sm truncate">{activity.name}</h4>
+                  <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{activity.durationSeconds} segundos</p>
                 </div>
-                <button 
-                  onClick={() => onDelete(activity.id)}
-                  className="text-slate-400 hover:text-danger transition-colors p-2"
-                >
-                  <Trash2 size={18} />
-                </button>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={() => onMove(activity.id, 'up')}
+                    disabled={index === 0}
+                    className="text-slate-500 hover:text-primary transition-colors p-1 disabled:opacity-20"
+                  >
+                    <ArrowUp size={16} />
+                  </button>
+                  <button 
+                    onClick={() => onMove(activity.id, 'down')}
+                    disabled={index === activities.length - 1}
+                    className="text-slate-500 hover:text-primary transition-colors p-1 disabled:opacity-20"
+                  >
+                    <ArrowDown size={16} />
+                  </button>
+                  <button 
+                    onClick={() => onDelete(activity.id)}
+                    className="text-slate-500 hover:text-danger transition-colors p-1 ml-1"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </motion.div>
             ))}
             {activities.length === 0 && (
