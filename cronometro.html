@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workout Timer Execution</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#11d473",
+              "background-light": "#f6f8f7",
+              "background-dark": "#102219",
+            },
+            fontFamily: {
+              "display": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<!-- Main Container -->
+<div class="relative flex h-screen w-full flex-col overflow-x-hidden">
+<!-- Top App Bar -->
+<div class="flex items-center p-4 justify-between">
+<button class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">close</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12">Session: Leg Day</h2>
+</div>
+<!-- Timer Area -->
+<main class="flex-1 flex flex-col items-center justify-center px-6">
+<!-- Visual Alert State (Last 5 Seconds) -->
+<!-- The following div represents the 'flash' indicator which would be active during last seconds -->
+<div class="absolute inset-0 bg-primary/5 pointer-events-none border-[12px] border-primary/20 rounded-none z-0"></div>
+<div class="z-10 text-center w-full max-w-md">
+<!-- Large Countdown Number (Current Activity Timer) -->
+<div class="relative inline-flex items-center justify-center mb-2">
+<!-- Progress Circle Background -->
+<svg class="w-64 h-64 transform -rotate-90">
+<circle class="text-primary/10" cx="128" cy="128" fill="transparent" r="120" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="128" cy="128" fill="transparent" r="120" stroke="currentColor" stroke-dasharray="754" stroke-dashoffset="180" stroke-width="8"></circle>
+</svg>
+<!-- Actual Timer Text -->
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<h1 class="text-slate-900 dark:text-slate-100 text-[80px] font-black leading-none">05</h1>
+<span class="text-primary font-bold tracking-widest text-sm uppercase">Seconds Left</span>
+</div>
+</div>
+<!-- Activity Details -->
+<div class="mt-8">
+<h4 class="text-primary text-sm font-extrabold leading-normal tracking-widest uppercase mb-1">Current Activity</h4>
+<h1 class="text-slate-900 dark:text-slate-100 text-3xl font-bold leading-tight tracking-tight">High Intensity Sprint</h1>
+</div>
+<!-- Stat Row -->
+<div class="flex gap-4 mt-10 w-full">
+<div class="flex flex-1 flex-col items-center p-4 rounded-xl bg-slate-200/50 dark:bg-primary/5 border border-primary/10">
+<span class="text-slate-500 dark:text-primary/60 text-xs font-bold uppercase tracking-tighter">Set</span>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">4 / 8</p>
+</div>
+<div class="flex flex-1 flex-col items-center p-4 rounded-xl bg-slate-200/50 dark:bg-primary/5 border border-primary/10">
+<span class="text-slate-500 dark:text-primary/60 text-xs font-bold uppercase tracking-tighter">Heart Rate</span>
+<p class="text-slate-900 dark:text-slate-100 text-xl font-bold">142 BPM</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer / Next Activity -->
+<footer class="p-6 pb-10 z-10">
+<div class="bg-slate-200/30 dark:bg-white/5 backdrop-blur-sm rounded-2xl p-5 border border-slate-200 dark:border-white/10">
+<div class="flex items-center justify-between mb-3">
+<span class="text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-widest">Next Activity</span>
+<span class="bg-primary/20 text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Rest</span>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-lg overflow-hidden flex-shrink-0">
+<img alt="Workout focus" class="w-full h-full object-cover" data-alt="Person resting and drinking water after exercise" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxRFy8NJvAGDnz4iDMGUzIEcdM-TXOhIu-UN1er9mSYJL-tm-aFzG1IdEArC0ZSlVLg0O19qN-OG0EemQIncJSYDhuwP4rexK0Xw56ac1Yd7zglE6vEqrK4pOHKVMVNlEOAMKmDakqSYUHkDkSO_zxwPV7p4p4jI7amb6__bUXCACohNRZLqy4rGLVQuezyHzQ8o4402bkvJNnkc1xgazmfk5sIEvJ1Odryml1H8KlCu31sVdXf_TlIh3gE02lCsMiDQCcPE9H14XE"/>
+</div>
+<div class="flex-1">
+<h3 class="text-slate-900 dark:text-slate-100 font-bold text-lg">Active Recovery Walk</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm italic">60 seconds</p>
+</div>
+<div class="text-slate-400">
+<span class="material-symbols-outlined">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Controls -->
+<div class="flex items-center justify-center gap-8 mt-8">
+<button class="size-14 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+<span class="material-symbols-outlined text-3xl">skip_previous</span>
+</button>
+<button class="size-20 rounded-full bg-primary flex items-center justify-center text-background-dark shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-5xl">pause</span>
+</button>
+<button class="size-14 rounded-full border-2 border-slate-300 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+<span class="material-symbols-outlined text-3xl">skip_next</span>
+</button>
+</div>
+</footer>
+</div>
+</body></html>
