@@ -7,7 +7,7 @@ Uma aplicação web moderna e minimalista para gerenciar sequências de atividad
 ## ✨ Funcionalidades Principais
 
 - 📝 **Lista de Tarefas Customizada**: Adicione etapas com descrições de até 180 caracteres.
-- ⏱️ **Cronômetro Inteligente**: Tempo definido em minutos com precisão decimal.
+- ⏱️ **Cronômetro Inteligente**: Tempo definido em segundos para precisão total em treinos curtos e rotinas rápidas.
 - 🔄 **Fluxo de Execução Automatizado**:
   - Countdown de 5 segundos para preparação antes do início.
   - Transição automática entre atividades.

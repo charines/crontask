@@ -30,11 +30,11 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
   }, [activities]);
 
-  const addActivity = (name, durationMinutes) => {
+  const addActivity = (name, durationSeconds) => {
     const newActivity = {
       id: Date.now(),
       name,
-      durationMinutes: parseFloat(durationMinutes)
+      durationSeconds: parseFloat(durationSeconds)
     };
     setActivities([...activities, newActivity]);
   };
@@ -67,7 +67,7 @@ export default function App() {
     if (currentActivityIndex < activities.length - 1) {
       const nextIdx = currentActivityIndex + 1;
       setCurrentActivityIndex(nextIdx);
-      setTimeLeft(activities[nextIdx].durationMinutes * 60);
+      setTimeLeft(activities[nextIdx].durationSeconds);
       setIsPreStart(false);
     } else {
       setIsActive(false);
@@ -132,7 +132,7 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
     setDuration('');
   };
 
-  const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationMinutes, 0) * 100) / 100;
+  const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationSeconds, 0));
 
   return (
     <motion.div 
@@ -178,13 +178,13 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-slate-300">Duração (minutos)</label>
+            <label className="text-sm font-semibold text-slate-300">Duração (segundos)</label>
             <div className="flex">
               <input 
                 className="flex-1 rounded-l-lg border border-primary/20 bg-primary/5 text-white focus:border-primary focus:ring-1 focus:ring-primary h-12 px-4 border-r-0 outline-none"
-                placeholder="5"
+                placeholder="30"
                 type="number"
-                step="0.1"
+                step="1"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
               />
@@ -222,7 +222,7 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
                 <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">{index + 1}</div>
                 <div className="flex-1">
                   <h4 className="font-semibold text-sm">{activity.name}</h4>
-                  <p className="text-xs text-slate-400">{activity.durationMinutes} minutos</p>
+                  <p className="text-xs text-slate-400">{activity.durationSeconds} segundos</p>
                 </div>
                 <button 
                   onClick={() => onDelete(activity.id)}
@@ -245,7 +245,7 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
       <div className="absolute bottom-0 left-0 w-full p-6 bg-background-dark/95 border-t border-white/10 pb-10 backdrop-blur-md">
         <div className="flex items-center justify-between mb-4 px-1">
           <span className="text-sm font-medium text-slate-500">Duração Total:</span>
-          <span className="text-base font-bold text-primary">{totalTime} minutos</span>
+          <span className="text-base font-bold text-primary">{totalTime} segundos</span>
         </div>
         <button 
           onClick={onStart}
@@ -261,10 +261,10 @@ function ConfigView({ activities, onAdd, onDelete, onClear, onStart }) {
 }
 
 function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, isPreStart, onClose, onSkip }) {
-  const currentActivity = currentIndex === -1 ? { name: "Prepare-se!", durationMinutes: 5/60 } : activities[currentIndex];
+  const currentActivity = currentIndex === -1 ? { name: "Prepare-se!", durationSeconds: 5 } : activities[currentIndex];
   const nextActivity = currentIndex < activities.length - 1 ? activities[currentIndex + 1] : null;
 
-  const totalSecondsForCircle = isPreStart ? 5 : currentActivity.durationMinutes * 60;
+  const totalSecondsForCircle = isPreStart ? 5 : currentActivity.durationSeconds;
   const progress = (timeLeft / totalSecondsForCircle) * 100;
   const isLastSeconds = timeLeft <= 5 && timeLeft > 0;
 
@@ -281,7 +281,7 @@ function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, 
     return circumference - (progress / 100) * circumference;
   };
 
-  const totalTimeLeft = activities.slice(Math.max(0, currentIndex)).reduce((acc, c) => acc + c.durationMinutes * 60, 0) - (currentIndex === -1 ? 0 : (totalSecondsForCircle - timeLeft));
+  const totalTimeLeft = activities.slice(Math.max(0, currentIndex)).reduce((acc, c) => acc + c.durationSeconds, 0) - (currentIndex === -1 ? 0 : (totalSecondsForCircle - timeLeft));
 
   return (
     <motion.div 
@@ -355,9 +355,9 @@ function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, 
             <p className="text-white text-xl font-bold">{currentIndex === -1 ? 0 : currentIndex + 1} / {activities.length}</p>
           </div>
           <div className="flex flex-1 flex-col items-center p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Minutos Restantes</span>
+            <span className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-1">Segundos Restantes</span>
             <p className="text-white text-xl font-bold">
-              {Math.max(0, Math.ceil(totalTimeLeft / 60))}
+              {Math.max(0, Math.ceil(totalTimeLeft))}
             </p>
           </div>
         </div>
@@ -385,7 +385,7 @@ function TimerView({ activities, currentIndex, timeLeft, isActive, setIsActive, 
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-white font-bold text-sm truncate">{nextActivity.name}</h3>
-                    <p className="text-slate-500 text-[10px]">{nextActivity.durationMinutes} minutos</p>
+                    <p className="text-slate-500 text-[10px]">{nextActivity.durationSeconds} segundos</p>
                   </div>
                   <button onClick={onSkip} className="text-slate-400 hover:text-white transition-colors">
                     <ChevronRight size={20} />

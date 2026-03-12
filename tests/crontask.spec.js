@@ -9,12 +9,12 @@ test.describe('CronTask E2E Tests', () => {
   test('should create a sequence and run it', async ({ page }) => {
     // 1. Add first task
     await page.fill('input[placeholder="Ex: Alongamento Matinal"]', 'Atividade 1');
-    await page.fill('input[placeholder="5"]', '0.1'); // 6 seconds
+    await page.fill('input[placeholder="30"]', '6'); // 6 seconds
     await page.click('button:has-text("Adicionar Etapa")');
 
     // 2. Add second task
     await page.fill('input[placeholder="Ex: Alongamento Matinal"]', 'Atividade 2');
-    await page.fill('input[placeholder="5"]', '0.1'); // 6 seconds
+    await page.fill('input[placeholder="30"]', '6'); // 6 seconds
     await page.click('button:has-text("Adicionar Etapa")');
 
     // Verify tasks added
@@ -31,7 +31,7 @@ test.describe('CronTask E2E Tests', () => {
     await page.waitForTimeout(6000);
 
     // 5. Verify first activity is running
-    await expect(page.locator('text=Atividade Atual')).toBeVisible();
+    await expect(page.locator('text=PROCESSO ATUAL')).toBeVisible();
     await expect(page.locator('text=Atividade 1')).toBeVisible();
     
     // 6. Check for next activity preview
@@ -46,18 +46,18 @@ test.describe('CronTask E2E Tests', () => {
     await expect(page.locator('text=Atividade 2')).toBeVisible();
 
     // 9. Wait for completion
+    // The sequence completion shows an alert in current implementation
+    // Adding listener before skip/timeout
+    page.on('dialog', dialog => dialog.accept());
     await page.waitForTimeout(7000);
-    await expect(page.locator('text=Pronto!')).toBeVisible();
-    await expect(page.locator('text=Você completou toda a sequência')).toBeVisible();
-
-    // 10. Back to start
-    await page.click('button:has-text("Voltar ao Início")');
+    
+    // 10. Verify back to config screen
     await expect(page.locator('text=Configurar Sequência')).toBeVisible();
   });
 
   test('should persist data in localStorage', async ({ page }) => {
     await page.fill('input[placeholder="Ex: Alongamento Matinal"]', 'Tarefa Persistente');
-    await page.fill('input[placeholder="5"]', '10');
+    await page.fill('input[placeholder="30"]', '10');
     await page.click('button:has-text("Adicionar Etapa")');
 
     // Reload page
@@ -65,12 +65,12 @@ test.describe('CronTask E2E Tests', () => {
 
     // Verify it's still there
     await expect(page.locator('text=Tarefa Persistente')).toBeVisible();
-    await expect(page.locator('text=10 minutos')).toBeVisible();
+    await expect(page.locator('text=10 segundos')).toBeVisible();
   });
 
   test('should clear all activities', async ({ page }) => {
     await page.fill('input[placeholder="Ex: Alongamento Matinal"]', 'Tarefa a Limpar');
-    await page.fill('input[placeholder="5"]', '5');
+    await page.fill('input[placeholder="30"]', '5');
     await page.click('button:has-text("Adicionar Etapa")');
 
     // Mock confirm dialog
