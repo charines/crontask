@@ -7,19 +7,22 @@ import {
   Trash2,
   Play,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  ArrowLeftRight
 } from 'lucide-react';
 
 export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClear, onStart, onBack }) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
+  const [bothSides, setBothSides] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !duration) return;
-    onAdd(name, duration);
+    onAdd(name, duration, bothSides);
     setName('');
     setDuration('');
+    setBothSides(false);
   };
 
   const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationSeconds, 0));
@@ -84,6 +87,18 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
               </div>
             </div>
           </div>
+
+          <div className="flex items-center gap-3 p-4 rounded-lg border border-primary/20 bg-primary/5 cursor-pointer select-none transition-all hover:bg-primary/10" onClick={() => setBothSides(!bothSides)}>
+            <div className={`w-10 h-6 rounded-full transition-colors relative ${bothSides ? 'bg-primary' : 'bg-white/10'}`}>
+              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${bothSides ? 'left-5' : 'left-1'}`} />
+            </div>
+            <div className="flex-1">
+              <span className="text-sm font-semibold text-slate-300">Ambos os lados (Direito/Esquerdo)</span>
+              <p className="text-[10px] text-primary/60">Cria 2 registros automaticamente</p>
+            </div>
+            <ArrowLeftRight size={18} className={bothSides ? 'text-primary' : 'text-slate-500'} />
+          </div>
+
           <button
             type="submit"
             className="w-full bg-primary/20 hover:bg-primary/30 text-primary font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all mt-2 active:scale-[0.98]"

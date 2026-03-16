@@ -22,13 +22,27 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
   }, [activities]);
 
-  const addActivity = (name, durationSeconds) => {
-    const newActivity = {
-      id: Date.now(),
-      name,
-      durationSeconds: parseFloat(durationSeconds)
-    };
-    setActivities([...activities, newActivity]);
+  const addActivity = (name, durationSeconds, bothSides = false) => {
+    if (bothSides) {
+      const rightSide = {
+        id: `${Date.now()}-r`,
+        name: `${name} (Direito)`,
+        durationSeconds: parseFloat(durationSeconds)
+      };
+      const leftSide = {
+        id: `${Date.now()}-l`,
+        name: `${name} (Esquerdo)`,
+        durationSeconds: parseFloat(durationSeconds)
+      };
+      setActivities(prev => [...prev, rightSide, leftSide]);
+    } else {
+      const newActivity = {
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name,
+        durationSeconds: parseFloat(durationSeconds)
+      };
+      setActivities(prev => [...prev, newActivity]);
+    }
   };
 
   const deleteActivity = (id) => {
