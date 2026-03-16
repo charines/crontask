@@ -22,27 +22,54 @@ export default function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(activities));
   }, [activities]);
 
-  const addActivity = (name, durationSeconds, bothSides = false) => {
+  const addActivity = (name, durationSeconds, bothSides = false, addInterval = false, intervalSeconds = 5) => {
+    const list = [];
+    const duration = parseFloat(durationSeconds);
+    const breakDuration = parseFloat(intervalSeconds);
+
     if (bothSides) {
-      const rightSide = {
+      list.push({
         id: `${Date.now()}-r`,
         name: `${name} (Direito)`,
-        durationSeconds: parseFloat(durationSeconds)
-      };
-      const leftSide = {
+        durationSeconds: duration
+      });
+      if (addInterval) {
+        list.push({
+          id: `${Date.now()}-ri`,
+          name: `Descanso`,
+          durationSeconds: breakDuration,
+          isBreak: true
+        });
+      }
+      list.push({
         id: `${Date.now()}-l`,
         name: `${name} (Esquerdo)`,
-        durationSeconds: parseFloat(durationSeconds)
-      };
-      setActivities(prev => [...prev, rightSide, leftSide]);
+        durationSeconds: duration
+      });
+      if (addInterval) {
+        list.push({
+          id: `${Date.now()}-li`,
+          name: `Descanso`,
+          durationSeconds: breakDuration,
+          isBreak: true
+        });
+      }
     } else {
-      const newActivity = {
+      list.push({
         id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name,
-        durationSeconds: parseFloat(durationSeconds)
-      };
-      setActivities(prev => [...prev, newActivity]);
+        durationSeconds: duration
+      });
+      if (addInterval) {
+        list.push({
+          id: `${Date.now()}-i`,
+          name: `Descanso`,
+          durationSeconds: breakDuration,
+          isBreak: true
+        });
+      }
     }
+    setActivities(prev => [...prev, ...list]);
   };
 
   const deleteActivity = (id) => {

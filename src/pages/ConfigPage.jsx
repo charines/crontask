@@ -8,21 +8,34 @@ import {
   Play,
   ArrowUp,
   ArrowDown,
-  ArrowLeftRight
+  ArrowLeftRight,
+  Coffee
 } from 'lucide-react';
 
 export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClear, onStart, onBack }) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
   const [bothSides, setBothSides] = useState(false);
+  const [addInterval, setAddInterval] = useState(() => {
+    const saved = localStorage.getItem('crontask_add_interval');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const [intervalDuration, setIntervalDuration] = useState(() => {
+    const saved = localStorage.getItem('crontask_interval_duration');
+    return saved !== null ? JSON.parse(saved) : '5';
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name || !duration) return;
-    onAdd(name, duration, bothSides);
+    onAdd(name, duration, bothSides, addInterval, intervalDuration);
     setName('');
     setDuration('');
     setBothSides(false);
+    
+    // Persist settings
+    localStorage.setItem('crontask_add_interval', JSON.stringify(addInterval));
+    localStorage.setItem('crontask_interval_duration', JSON.stringify(intervalDuration));
   };
 
   const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationSeconds, 0));
@@ -99,6 +112,46 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
             <ArrowLeftRight size={18} className={bothSides ? 'text-primary' : 'text-slate-500'} />
           </div>
 
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-4 rounded-lg border border-primary/20 bg-primary/5 cursor-pointer select-none transition-all hover:bg-primary/10" onClick={() => setAddInterval(!addInterval)}>
+              <div className={`w-10 h-6 rounded-full transition-colors relative ${addInterval ? 'bg-primary' : 'bg-white/10'}`}>
+                <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${addInterval ? 'left-5' : 'left-1'}`} />
+              </div>
+              <div className="flex-1">
+                <span className="text-sm font-semibold text-slate-300">Adicionar intervalo</span>
+                <p className="text-[10px] text-primary/60">Após cada atividade</p>
+              </div>
+              <Coffee size={18} className={addInterval ? 'text-primary' : 'text-slate-500'} />
+            </div>
+
+            {addInterval && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="flex flex-col gap-2 pl-4 border-l-2 border-primary/20"
+              >
+                <label className="text-[10px] font-bold uppercase tracking-wider text-primary/60">Segundos de descanso</label>
+                <div className="flex">
+                  <input
+                    className="flex-1 rounded-l-lg border border-primary/20 bg-primary/5 text-white focus:border-primary focus:ring-1 focus:ring-primary h-10 px-4 border-r-0 outline-none placeholder:text-white/20 text-sm"
+                    placeholder="5"
+                    type="number"
+                    step="1"
+                    min="1"
+                    value={intervalDuration}
+                    onChange={(e) => {
+                      setIntervalDuration(e.target.value);
+                      localStorage.setItem('crontask_interval_duration', JSON.stringify(e.target.value));
+                    }}
+                  />
+                  <div className="flex items-center px-4 bg-primary/5 border border-l-0 border-primary/20 rounded-r-lg text-primary/60">
+                    <Timer size={16} />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </div>
+
           <button
             type="submit"
             className="w-full bg-primary/20 hover:bg-primary/30 text-primary font-bold py-3 rounded-lg flex items-center justify-center gap-2 transition-all mt-2 active:scale-[0.98]"
@@ -123,11 +176,21 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 key={activity.id}
-                className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10 hover:border-primary/30 transition-colors group"
+                className={`flex items-center gap-3 p-4 rounded-xl border transition-colors group ${
+                  activity.isBreak 
+                    ? 'bg-amber-500/5 border-amber-500/20' 
+                    : 'bg-primary/5 border-primary/10 hover:border-primary/30'
+                }`}
               >
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">{index + 1}</div>
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
+                  activity.isBreak 
+                    ? 'bg-amber-500/20 text-amber-500' 
+                    : 'bg-primary/20 text-primary'
+                }`}>
+                  {activity.isBreak ? <Coffee size={14} /> : index + 1}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-sm truncate">{activity.name}</h4>
+                  <h4 className={`font-semibold text-sm truncate ${activity.isBreak ? 'text-amber-500' : ''}`}>{activity.name}</h4>
                   <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">{activity.durationSeconds} segundos</p>
                 </div>
                 <div className="flex items-center gap-1">

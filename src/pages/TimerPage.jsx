@@ -6,12 +6,14 @@ import {
   SkipBack,
   Pause,
   Play,
-  ChevronRight
+  ChevronRight,
+  Coffee
 } from 'lucide-react';
 
 export default function TimerPage({ activities, currentIndex, timeLeft, isActive, setIsActive, isPreStart, onClose, onSkip }) {
   const currentActivity = currentIndex === -1 ? { name: "Prepare-se!", durationSeconds: 5 } : activities[currentIndex];
   const nextActivity = currentIndex < activities.length - 1 ? activities[currentIndex + 1] : null;
+  const isBreak = currentActivity.isBreak || currentIndex === -1;
 
   const totalSecondsForCircle = isPreStart ? 5 : currentActivity.durationSeconds;
   const progress = (timeLeft / totalSecondsForCircle) * 100;
@@ -65,7 +67,7 @@ export default function TimerPage({ activities, currentIndex, timeLeft, isActive
               strokeWidth="6"
             />
             <motion.circle
-              className="text-primary"
+              className={isBreak ? "text-amber-500" : "text-primary"}
               cx="144" cy="144" r="120"
               fill="transparent"
               stroke="currentColor"
@@ -85,7 +87,7 @@ export default function TimerPage({ activities, currentIndex, timeLeft, isActive
             >
               {timeLeft < 60 ? timeLeft : formatTime(timeLeft)}
             </motion.h1>
-            <span className="text-primary font-bold tracking-[0.2em] text-[10px] uppercase mt-2 opacity-80">
+            <span className={`font-bold tracking-[0.2em] text-[10px] uppercase mt-2 opacity-80 ${isBreak ? 'text-amber-500' : 'text-primary'}`}>
               {isPreStart ? 'Segundos para começar' : 'Tempo Restante'}
             </span>
           </div>
@@ -93,7 +95,9 @@ export default function TimerPage({ activities, currentIndex, timeLeft, isActive
 
         {/* Activity Details */}
         <div className="mt-4 text-center w-full px-6">
-          <h4 className="text-primary/60 text-[10px] font-black leading-normal tracking-[0.3em] uppercase mb-1">PROCESSO ATUAL</h4>
+          <h4 className={`${isBreak ? 'text-amber-500/60' : 'text-primary/60'} text-[10px] font-black leading-normal tracking-[0.3em] uppercase mb-1`}>
+            {isBreak ? 'MANTENHA O FOCO' : 'PROCESSO ATUAL'}
+          </h4>
           <h1 className="text-white text-3xl font-extrabold leading-tight tracking-tight break-words">{currentActivity.name}</h1>
         </div>
 
@@ -129,8 +133,10 @@ export default function TimerPage({ activities, currentIndex, timeLeft, isActive
                   <div className="size-2 rounded-full bg-primary animate-pulse" />
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
-                    <SkipForward size={20} />
+                  <div className={`size-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                    nextActivity.isBreak ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'
+                  }`}>
+                    {nextActivity.isBreak ? <Coffee size={20} /> : <SkipForward size={20} />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-white font-bold text-sm truncate">{nextActivity.name}</h3>
@@ -154,7 +160,11 @@ export default function TimerPage({ activities, currentIndex, timeLeft, isActive
           </button>
           <button
             onClick={() => setIsActive(!isActive)}
-            className="size-20 rounded-full bg-primary flex items-center justify-center text-[#102219] shadow-[0_0_30px_rgba(17,212,115,0.3)] hover:scale-105 active:scale-95 transition-all"
+            className={`size-20 rounded-full flex items-center justify-center text-[#102219] transition-all hover:scale-105 active:scale-95 ${
+              isBreak 
+                ? 'bg-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]' 
+                : 'bg-primary shadow-[0_0_30px_rgba(17,212,115,0.3)]'
+            }`}
           >
             {isActive ? <Pause size={32} fill="currentColor" /> : <Play size={32} fill="currentColor" />}
           </button>
