@@ -1,0 +1,222 @@
+[
+  {
+    "id": "1",
+    "name": "Lateral da Lombar (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "2",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "3",
+    "name": "Lateral da Lombar (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "4",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "5",
+    "name": "Posterior das Coxas (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "6",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "7",
+    "name": "Posterior das Coxas (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "8",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "9",
+    "name": "Flexão de Pernas (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "10",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "11",
+    "name": "Flexão de Pernas (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "12",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "13",
+    "name": "Costas, Ombro e Trapézio (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "14",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "15",
+    "name": "Costas, Ombro e Trapézio (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "16",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "17",
+    "name": "Tríceps (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "18",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "19",
+    "name": "Tríceps (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "20",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "21",
+    "name": "Quadríceps (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "22",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "23",
+    "name": "Quadríceps (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "24",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "25",
+    "name": "Lateral da Lombar - Flexão (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "26",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "27",
+    "name": "Lateral da Lombar - Flexão (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "28",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "29",
+    "name": "Posteriores das Coxas (Toque no Solo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "30",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "31",
+    "name": "Flexão de Pernas (Agachamento)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "32",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "33",
+    "name": "Costas e Lateral da Lombar",
+    "durationSeconds": 20
+  },
+  {
+    "id": "34",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "35",
+    "name": "Costas e Antebraço",
+    "durationSeconds": 20
+  },
+  {
+    "id": "36",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "37",
+    "name": "Trapézio e Pescoço (Direito)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "38",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  },
+  {
+    "id": "39",
+    "name": "Trapézio e Pescoço (Esquerdo)",
+    "durationSeconds": 20
+  },
+  {
+    "id": "40",
+    "name": "Descanso",
+    "durationSeconds": 5,
+    "isBreak": true
+  }
+]

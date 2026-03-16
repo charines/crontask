@@ -72,6 +72,16 @@ export default function App() {
     setActivities(prev => [...prev, ...list]);
   };
 
+  const importActivities = (newList) => {
+    // Basic validation to ensure newList is an array and has required fields
+    if (Array.isArray(newList)) {
+      setActivities(newList.map(item => ({
+        ...item,
+        id: item.id || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      })));
+    }
+  };
+
   const deleteActivity = (id) => {
     setActivities(activities.filter(a => a.id !== id));
   };
@@ -165,6 +175,7 @@ export default function App() {
               onClear={clearAll}
               onStart={startSequence}
               onBack={goToLanding}
+              onImport={importActivities}
             />
           ) : (
             <TimerPage

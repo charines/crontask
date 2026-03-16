@@ -9,10 +9,12 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowLeftRight,
-  Coffee
+  Coffee,
+  Download,
+  Upload
 } from 'lucide-react';
 
-export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClear, onStart, onBack }) {
+export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClear, onStart, onBack, onImport }) {
   const [name, setName] = useState('');
   const [duration, setDuration] = useState('');
   const [bothSides, setBothSides] = useState(false);
@@ -36,6 +38,32 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
     // Persist settings
     localStorage.setItem('crontask_add_interval', JSON.stringify(addInterval));
     localStorage.setItem('crontask_interval_duration', JSON.stringify(intervalDuration));
+  };
+
+  const handleExport = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(activities, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "meu_treino.json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  const handleImport = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target.result);
+        onImport(json);
+      } catch (err) {
+        alert("Erro ao ler o arquivo JSON. Certifique-se de que é um formato válido.");
+      }
+    };
+    reader.readAsText(file);
   };
 
   const totalTime = Math.round(activities.reduce((acc, curr) => acc + curr.durationSeconds, 0));
@@ -65,9 +93,24 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-40">
         {/* Header Section */}
-        <div className="pt-6 pb-2">
-          <h2 className="text-2xl font-bold tracking-tight text-white">Nova Atividade</h2>
-          <p className="text-sm text-primary/60 mt-1">Crie seu fluxo personalizado</p>
+        <div className="pt-6 pb-2 flex items-end justify-between">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight text-white">Nova Atividade</h2>
+            <p className="text-sm text-primary/60 mt-1">Crie seu fluxo personalizado</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExport}
+              title="Exportar Treino"
+              className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-all"
+            >
+              <Download size={20} />
+            </button>
+            <label className="p-2 bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-all cursor-pointer">
+              <Upload size={20} />
+              <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+            </label>
+          </div>
         </div>
 
         {/* Input Form */}
