@@ -4,6 +4,11 @@ test.describe('CronTask E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app (assuming it's running on dev server)
     await page.goto('http://localhost:5173/');
+    // App now opens on LandingPage; navigate to ConfigPage first.
+    await page.click('button:has-text("Começar Agora")');
+    // Disable the automatic rest-interval feature so activity counts
+    // in this suite match one activity added = one entry in the list.
+    await page.click('text=Adicionar intervalo');
   });
 
   test('should create a sequence and run it', async ({ page }) => {
@@ -26,7 +31,7 @@ test.describe('CronTask E2E Tests', () => {
     await page.click('button:has-text("Iniciar Sequência")');
 
     // 4. Verify 5s countdown
-    await expect(page.locator('text=Iniciando em')).toBeVisible();
+    await expect(page.locator('text=Sessão Iniciando')).toBeVisible();
     // Wait for activity to start (5s prep)
     await page.waitForTimeout(6000);
 
@@ -62,10 +67,15 @@ test.describe('CronTask E2E Tests', () => {
 
     // Reload page
     await page.reload();
+    // Reload resets the view state to LandingPage; navigate back to
+    // ConfigPage (activities persisted, so the button reads "Configurar Nova").
+    await page.click('button:has-text("Configurar Nova")');
 
     // Verify it's still there
     await expect(page.locator('text=Tarefa Persistente')).toBeVisible();
-    await expect(page.locator('text=10 segundos')).toBeVisible();
+    // "10 segundos" also appears in the footer's total-duration summary,
+    // so scope the check to the activity row specifically.
+    await expect(page.locator('text=Tarefa Persistente').locator('..').locator('text=10 segundos')).toBeVisible();
   });
 
   test('should clear all activities', async ({ page }) => {
@@ -76,7 +86,8 @@ test.describe('CronTask E2E Tests', () => {
     // Mock confirm dialog
     page.on('dialog', dialog => dialog.accept());
     
-    await page.click('button:has-text("Limpar")');
+    // The clear-all control is an icon-only button (Trash2), no text label.
+    await page.click('button:has(svg.lucide-trash-2)');
 
     await expect(page.locator('text=Nenhuma atividade adicionada ainda')).toBeVisible();
   });

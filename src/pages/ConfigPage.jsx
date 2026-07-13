@@ -59,7 +59,7 @@ export default function ConfigPage({ activities, onAdd, onDelete, onMove, onClea
       try {
         const json = JSON.parse(event.target.result);
         onImport(json);
-      } catch (err) {
+      } catch {
         alert("Erro ao ler o arquivo JSON. Certifique-se de que é um formato válido.");
       }
     };
